@@ -1,0 +1,113 @@
+{
+  "ConfigParams": {
+    "GlobalParams": {
+      "withITS3": "true"
+    },
+    "keyval": {
+      "input_dir": "/workdir",
+      "output_dir": "/dev/null"
+    },
+    "GPU_global": {
+      "deviceType": "CPU",
+      "dEdxDisableResidualGainMap": "1",
+      "dEdxDisableResidualGain": "1"
+    },
+    "GPU_proc": {
+      "debugLevel": "0",
+      "tpcInputWithClusterRejection": "1",
+      "ompThreads": "5",
+      "deviceNum": "-2"
+    },
+    "TPCCorrMap": {
+      "lumiMean": "-1"
+    },
+    "GPU_rec_tpc": {
+      "trackletMinSharedNormFactor": "1.",
+      "trackletMaxSharedFraction": "0.3",
+      "rejectIFCLowRadiusCluster": "1"
+    },
+    "trackTuneParams": {
+      "sourceLevelTPC": "true",
+      "tpcCovInnerType": "2",
+      "tpcCovInner[0]": "0.05",
+      "tpcCovInner[1]": "0.2",
+      "tpcCovInner[2]": "0.0003",
+      "tpcCovInner[3]": "0.0013",
+      "tpcCovInner[4]": "0.0059300284",
+      "tpcCovInnerSlope[0]": "1.4794650254467986e-08",
+      "tpcCovInnerSlope[1]": "5.9178601017871944e-08",
+      "tpcCovInnerSlope[2]": "8.87679015268079e-11",
+      "tpcCovInnerSlope[3]": "3.846609066161676e-10",
+      "tpcCovInnerSlope[4]": "1.7546539235412473e-09",
+      "tpcCovOuterType": "2",
+      "tpcCovOuter[0]": "0.05",
+      "tpcCovOuter[1]": "0.2",
+      "tpcCovOuter[2]": "0.0003",
+      "tpcCovOuter[3]": "0.0013",
+      "tpcCovOuter[4]": "0.0059300284",
+      "tpcCovOuterSlope[0]": "1.4794650254467986e-08",
+      "tpcCovOuterSlope[1]": "5.9178601017871944e-08",
+      "tpcCovOuterSlope[2]": "8.87679015268079e-11",
+      "tpcCovOuterSlope[3]": "3.846609066161676e-10",
+      "tpcCovOuterSlope[4]": "1.7546539235412473e-09"
+    },
+    "ITSVertexerParam": {
+      "phiCut": "0.5",
+      "clusterContributorsCut": "3",
+      "tanLambdaCut": "0.2"
+    },
+    "ITSCATrackerParam": {
+      "sysErrY2[0]": "100e-8",
+      "sysErrZ2[0]": "100e-8",
+      "sysErrY2[1]": "100e-8",
+      "sysErrZ2[1]": "100e-8",
+      "sysErrY2[2]": "100e-8",
+      "sysErrZ2[2]": "100e-8",
+      "sysErrY2[3]": "100e-8",
+      "sysErrZ2[3]": "100e-8",
+      "sysErrY2[4]": "100e-8",
+      "sysErrZ2[4]": "100e-8",
+      "sysErrY2[5]": "100e-8",
+      "sysErrZ2[5]": "100e-8",
+      "sysErrY2[6]": "100e-8",
+      "sysErrZ2[6]": "100e-8",
+
+      "startLayerMask[0]": 127,
+      "startLayerMask[1]": 127,
+      "startLayerMask[2]": 127,
+
+      "minPtIterLgt[0]": 0.05,
+      "minPtIterLgt[1]": 0.05,
+      "minPtIterLgt[2]": 0.05,
+      "minPtIterLgt[3]": 0.05,
+      "minPtIterLgt[4]": 0.05,
+      "minPtIterLgt[5]": 0.05,
+      "minPtIterLgt[6]": 0.05,
+      "minPtIterLgt[7]": 0.05,
+      "minPtIterLgt[8]": 0.05,
+      "minPtIterLgt[9]": 0.09,
+      "minPtIterLgt[10]": 0.167,
+      "minPtIterLgt[11]": 0.125
+    },
+    "ITSClustererParam": {
+      "maxBCDiffToMaskBias": "-10",
+      "maxBCDiffToSquashBias": "10"
+    },
+    "tpcitsMatch": {
+      "globalTimeExtraErrorMUS": "0.2",
+      "runAfterBurner": "false"
+    },
+    "GPU_rec_trd": {
+      "minTrackPt": "0.3"
+    },
+    "pvertexer": {
+      "maxChi2TZDebris": "40",
+      "acceptableScale2": "9",
+      "minScale2": "2",
+      "maxChi2Mean": "12",
+      "maxMultRatDebris": "1.",
+      "addTimeSigma2Debris": "1e-2",
+      "meanVertexExtraErrSelection": "0.03"
+    }
+  }
+}
