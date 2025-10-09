@@ -8,11 +8,16 @@
 #include <TCanvas.h>
 #include <TFrame.h>
 #include <TH1F.h>
+#include "TH1D.h"
 #include <TH2F.h>
+#include "TH2D.h"
 #include <TLegend.h>
 #include <TLatex.h>
 #include <TTree.h>
 #include <TFile.h>
+#include <TError.h>
+#include "TString.h"
+#include <TPaletteAxis.h>
 
 #include <cmath>
 
@@ -20,7 +25,7 @@ namespace alicestyle
 {
 
 TStyle* aliceStyle{nullptr};
-Double_t aliceTextSize = 0.75;
+Double_t aliceTextSize = 0.03;
 Double_t aliceTextOffsetX = 0;
 Double_t aliceTextSizeAxis = 0.06;
 Double_t aliceTextSizeLeg = 0.06;
@@ -159,6 +164,11 @@ void setALICEStyle(bool force = true)
   aliceStyle->SetPalette("batlow.txt");
   aliceStyle->SetNumberContours(256);
 
+  // legends
+  aliceStyle->SetLegendFillStyle(kWhite);
+  aliceStyle->SetLegendBorderSize(0);
+  aliceStyle->SetLegendFont(additionalInfoFont);
+
   TColor::DefinedColors(1);
 
   // Using the Style.
@@ -179,25 +189,25 @@ void aliceDrawHist(TH1* h, int color, int marker, const char* opt = "hist e same
 }
 
 TLegend* aliceLeg(Double_t x1, Double_t y1, Double_t x2, Double_t y2,
+                  Int_t columns = 0,
+                  Bool_t whiteBg = kFALSE,
                   Double_t textSize = aliceTextSizeLeg,
                   Style_t textFont = aliceTextFont,
-                  Color_t textColor = kBlack,
-                  Int_t columns = 0)
+                  Color_t textColor = kBlack)
 {
   TLegend* leg = new TLegend(x1, y1, x2, y2, "", "brNDC");
-
-  leg->SetTextSize(textSize);
-  leg->SetTextFont(textFont);
-  leg->SetTextColor(textColor);
-  leg->SetBorderSize(0);
-  leg->SetFillStyle(0);
-  leg->SetFillColor(0);
+  if (whiteBg) {
+    leg->SetFillStyle(1001); // solid fill
+    leg->SetFillColor(kWhite);
+  } else {
+    leg->SetFillStyle(0); // transparent
+    leg->SetFillColor(0);
+  }
 
   if (columns != 0) {
     leg->SetNColumns(columns);
   }
   leg->Draw();
-
   return leg;
 }
 
@@ -214,6 +224,21 @@ void drawText(const char* text, Double_t posX, Double_t posY,
   latex.SetTextSize(size);
 
   latex.DrawLatex(posX, posY, text);
+}
+
+void drawThisThesis(Double_t offsetX = 0.01, Double_t offsetY = 0.03)
+{
+  if (!gPad) {
+    Error("drawThisThesis", "No current pad (gPad == nullptr)");
+    return;
+  }
+
+  // Compute the upper-left corner inside the pad margins
+  Double_t x = gPad->GetLeftMargin() + offsetX;
+  Double_t y = 1.0 - gPad->GetTopMargin() + offsetY;
+
+  // Align = 13: left-aligned horizontally, top-aligned vertically (upper-left corner)
+  drawText("THIS THESIS", x, y, additionalInfoFont, 13, aliceTextSize);
 }
 
 void updatePad(TVirtualPad* ppad)
@@ -243,7 +268,8 @@ TCanvas* aliceCanvas(const char* canvName,
                      Bool_t square = kTRUE,
                      Double_t extraSpace = 0,
                      Bool_t with_z_axis = kFALSE,
-                     Double_t yTitOffset = -999)
+                     Double_t yTitOffset = -999,
+                     TH1* h = nullptr)
 {
   if (aliceStyle == nullptr) {
     setALICEStyle();
@@ -289,7 +315,7 @@ TCanvas* aliceCanvas(const char* canvName,
   canv->SetLeftMargin(leftN);
   canv->SetRightMargin(rightN);
   if (with_z_axis) {
-    canv->SetRightMargin(rightN + 0.03);
+    canv->SetRightMargin(rightN + 0.105);
   }
   canv->SetTopMargin(topN);
   canv->SetBottomMargin(bottomN);
@@ -306,12 +332,17 @@ TCanvas* aliceCanvas(const char* canvName,
   }
 
   // Draw the frame for plotting things and set axis labels
-  TH1* h = canv->DrawFrame(x_min, y_min, x_max, y_max);
+  auto hProv = h != nullptr;
+  if (!hProv) {
+    h = canv->DrawFrame(x_min, y_min, x_max, y_max);
+  }
   h->GetYaxis()->SetTitleOffset(y_offset);
   h->GetXaxis()->SetTitleOffset(1.2);
   h->GetXaxis()->SetTitle(nameXaxis);
   h->GetYaxis()->SetTitle(nameYaxis);
-  h->Draw("AXIS");
+  if (!hProv) {
+    h->Draw("AXIS");
+  }
 
   // Force an update so ROOT has computed the axis text extents
   canv->Update();
@@ -345,7 +376,9 @@ TCanvas* aliceCanvas(const char* canvName,
   canv->cd();
   canv->Modified();
   canv->Update();
-  gPad->RedrawAxis("g");
+  if (gridon) {
+    gPad->RedrawAxis("g");
+  }
 
   return canv;
 }
@@ -364,6 +397,161 @@ void saveCanvas(TVirtualPad* pcanv, const std::string& path, bool close = false)
 void saveCurrentCanvas(const std::string& path, bool close = false)
 {
   saveCanvas(gPad, path, close);
+}
+
+TH1D* getSlicesAlongX(const TH2* h2, Bool_t mean)
+{
+  if (!h2) {
+    Error("CreateRMSvsX", "Input histogram is null!");
+    return nullptr;
+  }
+
+  // Create output histogram
+  TString name, title;
+  if (mean) {
+    name = TString(h2->GetName()) + "_meanY";
+    title = TString("Mean of Y slices;") + h2->GetXaxis()->GetTitle() + ";Mean(Y)";
+  } else {
+    name = TString(h2->GetName()) + "_rmsY";
+    title = TString("RMS of Y slices;") + h2->GetXaxis()->GetTitle() + ";RMS(Y)";
+  }
+
+  Int_t nbinsX = h2->GetNbinsX();
+  Double_t xlow = h2->GetXaxis()->GetXmin();
+  Double_t xup = h2->GetXaxis()->GetXmax();
+
+  TH1D* h = new TH1D(name, title, nbinsX, xlow, xup);
+
+  // Loop over x bins
+  for (Int_t i = 1; i <= nbinsX; ++i) {
+    // Project Y for each X-bin
+    std::unique_ptr<TH1D> projY(static_cast<TH1D*>(h2->ProjectionY("_py", i, i, "e")));
+
+    if (projY->GetEntries() > 0) {
+      if (mean) {
+        Double_t mean = projY->GetMean();
+        Double_t meanErr = projY->GetMeanError();
+        h->SetBinContent(i, mean);
+        h->SetBinError(i, meanErr);
+      } else {
+        Double_t rms = projY->GetRMS();
+        Double_t rmsErr = projY->GetRMSError();
+        h->SetBinContent(i, rms);
+        h->SetBinError(i, rmsErr);
+      }
+    } else {
+      h->SetBinContent(i, 0);
+      h->SetBinError(i, 0);
+    }
+  }
+
+  return h;
+}
+
+void aliceDrawTH2(TH2* h, Bool_t withZAxis = false, Bool_t withExtra = true, Bool_t doRMS = false, float x1 = 0.66, float x2 = -999, float y1 = -999, float y2 = 0.42)
+{
+  h->Draw((withZAxis) ? "COLZ" : "COL");
+  if (withExtra) {
+    TH1D *h1 = nullptr, *h2 = nullptr;
+    if (doRMS) {
+      h2 = getSlicesAlongX(h, false);
+      h1 = getSlicesAlongX(h, true);
+    } else {
+      h->FitSlicesY();
+      h2 = gDirectory->Get<TH1D>(Form("%s_2", h->GetName()));
+      h1 = gDirectory->Get<TH1D>(Form("%s_1", h->GetName()));
+    }
+    aliceDrawHist(h2, kALICEBlue, kALICESquare);
+    aliceDrawHist(h1, kALICERed, kALICECircle);
+    TLegend* leg = nullptr;
+    if (x2 == -999 || y1 == -999) {
+      x2 = 1.0 - gPad->GetRightMargin(); // right edge of plot area
+      y1 = gPad->GetBottomMargin();
+    }
+    leg = aliceLeg(x1, y1, x2, y2, 0, true);
+    leg->AddEntry(h1, "#mu", "p");
+    leg->AddEntry(h2, (doRMS) ? "RMS" : "#sigma", "p");
+  }
+}
+
+void aliceNormalize(TH1* h)
+{
+  h->Scale(1. / h->Integral("width"));
+  h->GetYaxis()->SetTitle("n. entries");
+}
+
+void aliceNormalize(TH2* h)
+{
+  h->Scale(1. / h->Integral("width"));
+  h->GetZaxis()->SetTitle("n. entries");
+}
+
+void adjustPaletteWidth(TH2* h2, Double_t scale = 0.5)
+{
+  gPad->Update();
+  auto* palette = (TPaletteAxis*)h2->GetListOfFunctions()->FindObject("palette");
+  if (palette) {
+    Double_t x1 = palette->GetX1NDC();
+    Double_t x2 = palette->GetX2NDC();
+    // Make it thinner and move it slightly closer to the plot
+    Double_t width = x2 - x1;
+    x1 = 1.0 - gPad->GetRightMargin(); // right edge of plot area
+    palette->SetX1NDC(x1);
+    // optionally adjust position
+    palette->SetX2NDC(x2 - scale * width);
+    gPad->Modified();
+    gPad->Update();
+  } else {
+    Error("", "no palette available");
+  }
+}
+
+/// Draw h2 with COLZ and place the Z title neatly next to the palette.
+/// optional xPadGap is the extra gap (in NDC) between palette left edge and title.
+void drawZTitle(TH2* h2, Double_t extraGap = 0.03)
+{
+  if (!h2) {
+    return;
+  }
+
+  gPad->Update(); // palette is created only after Update()
+
+  // Get palette
+  auto* palette = (TPaletteAxis*)h2->GetListOfFunctions()->FindObject("palette");
+
+  // Palette NDC coordinates (0..1 relative to pad)
+  Double_t palX1 = palette->GetX1NDC();
+  Double_t palX2 = palette->GetX2NDC();
+  Double_t palY1 = palette->GetY1NDC();
+  Double_t palY2 = palette->GetY2NDC();
+
+  TAxis* zaxis = h2->GetZaxis();
+  if (!zaxis) {
+    return;
+  }
+
+  TString ztitle = zaxis->GetTitle();
+  Float_t titleSize = zaxis->GetTitleSize(); // typically in NDC (fraction of pad height)
+  Float_t labelSize = zaxis->GetLabelSize(); // typically in NDC
+  Int_t labelFont = zaxis->GetLabelFont();
+
+  // Desired title position: centered horizontally over palette, just above palY2
+  Double_t titleX = 0.5 * (palX1 + palX2);
+  Double_t titleY = palY2 + extraGap;
+
+  palette->SetTitle(""); // avoid duplicate titles
+
+  // Draw title using TLatex in NDC coordinates, rotated 90 degrees
+  TLatex latex;
+  latex.SetNDC();
+  latex.SetTextFont(labelFont);
+  latex.SetTextSize(titleSize);
+  latex.SetTextAlign(22); // center horiz & vert
+  latex.SetTextAngle(0);  // horizontal text
+  latex.DrawLatex(titleX, titleY, ztitle.Data());
+
+  gPad->Modified();
+  gPad->Update();
 }
 
 } // namespace alicestyle
