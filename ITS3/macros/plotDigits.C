@@ -31,10 +31,15 @@ void plotDigits(const char* fName = "CheckDigits.root")
   float etaH; // eta of hit
   tree->SetBranchAddress("etaH", &etaH);
 
-  auto hDzIB = new TH2F("hDzIB", "", 100, 0, 1.5, 400, -50, 50);
-  auto hDxIB = new TH2F("hDxIB", "", 100, 0, 1.5, 400, -50, 50);
-  auto hDzOB = new TH2F("hDzOB", "", 100, 0, 1.5, 400, -50, 50);
-  auto hDxOB = new TH2F("hDxOB", "", 100, 0, 1.5, 400, -50, 50);
+  const double etaMax{3.0}, etaDiv{0.5};
+  auto hDzIB = new TH2F("hDzIB", "", 30, 0, etaMax, 200, -50, 50);
+  hDzIB->GetXaxis()->SetNdivisions(6, 4, 0, false);
+  auto hDxIB = new TH2F("hDxIB", "", 30, 0, etaMax, 200, -50, 50);
+  hDxIB->GetXaxis()->SetNdivisions(6, 4, 0, false);
+  auto hDzOB = new TH2F("hDzOB", "", 30, 0, etaMax, 200, -50, 50);
+  hDzOB->GetXaxis()->SetNdivisions(6, 4, 0, false);
+  auto hDxOB = new TH2F("hDxOB", "", 30, 0, etaMax, 200, -50, 50);
+  hDxOB->GetXaxis()->SetNdivisions(6, 4, 0, false);
 
   for (int iEntry = 0; tree->LoadTree(iEntry) >= 0; ++iEntry) {
     tree->GetEntry(iEntry);

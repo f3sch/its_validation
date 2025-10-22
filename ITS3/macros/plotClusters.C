@@ -31,10 +31,15 @@ void plotClusters(const char* fName = "CheckClusters.root")
   float eta; // eta of cluster
   tree->SetBranchAddress("eta", &eta);
 
-  auto hDzIB = new TH2F("hDzIB", "", 100, 0, 1.5, 400, -25, 25);
-  auto hDxIB = new TH2F("hDxIB", "", 100, 0, 1.5, 400, -25, 25);
-  auto hDzOB = new TH2F("hDzOB", "", 100, 0, 1.5, 400, -25, 25);
-  auto hDxOB = new TH2F("hDxOB", "", 100, 0, 1.5, 400, -25, 25);
+  const double etaMax{3.0}, etaDiv{0.5};
+  auto hDzIB = new TH2F("hDzIB", "", 30, 0, etaMax, 200, -25, 25);
+  hDzIB->GetXaxis()->SetNdivisions(6, 4, 0, false);
+  auto hDxIB = new TH2F("hDxIB", "", 30, 0, etaMax, 200, -25, 25);
+  hDxIB->GetXaxis()->SetNdivisions(6, 4, 0, false);
+  auto hDzOB = new TH2F("hDzOB", "", 30, 0, etaMax, 200, -25, 25);
+  hDzOB->GetXaxis()->SetNdivisions(6, 4, 0, false);
+  auto hDxOB = new TH2F("hDxOB", "", 30, 0, etaMax, 200, -25, 25);
+  hDxOB->GetXaxis()->SetNdivisions(6, 4, 0, false);
 
   for (int iEntry = 0; tree->LoadTree(iEntry) >= 0; ++iEntry) {
     tree->GetEntry(iEntry);
@@ -48,7 +53,7 @@ void plotClusters(const char* fName = "CheckClusters.root")
   }
 
   { // IB
-    aliceCanvas("InnerBarrel Cluster dZ", 0, 1.5, -25, 25, "|eta_{Cluster}|", "#Delta(z_{Hit} - z_{Cluster}) (#mum)", false, false, false, true, 0, true, -999, hDzIB);
+    aliceCanvas("InnerBarrel Cluster dZ", 0, etaMax, -25, 25, "|eta_{Hit}|", "#Delta(z_{Hit} - z_{Cluster COG}) (#mum)", false, false, false, true, 0, true, -999, hDzIB);
     aliceNormalize(hDzIB);
     aliceDrawTH2(hDzIB, true);
     adjustPaletteWidth(hDzIB);
@@ -57,7 +62,7 @@ void plotClusters(const char* fName = "CheckClusters.root")
     saveCurrentCanvas("clusterIBDeltaZ.pdf");
   }
   { // OB
-    aliceCanvas("OuterBarrel Cluster dZ", 0, 1.5, -25, 25, "|eta_{Cluster}|", "#Delta(z_{Hit} - z_{Cluster}) (#mum)", false, false, false, true, 0, true, -999, hDzOB);
+    aliceCanvas("OuterBarrel Cluster dZ", 0, etaMax, -25, 25, "|eta_{Hit}|", "#Delta(z_{Hit} - z_{Cluster COG}) (#mum)", false, false, false, true, 0, true, -999, hDzOB);
     aliceNormalize(hDzOB);
     aliceDrawTH2(hDzOB, true);
     adjustPaletteWidth(hDzOB);
@@ -66,7 +71,7 @@ void plotClusters(const char* fName = "CheckClusters.root")
     saveCurrentCanvas("clusterOBDeltaZ.pdf");
   }
   { // IB
-    aliceCanvas("InnerBarrel Cluster dX", 0, 1.5, -25, 25, "|eta_{Cluster}|", "#Delta(x_{Hit} - x_{Cluster}) (#mum)", false, false, false, true, 0, true, -999, hDxIB);
+    aliceCanvas("InnerBarrel Cluster dX", 0, etaMax, -25, 25, "|eta_{Hit}|", "#Delta(x_{Hit} - x_{Cluster COG}) (#mum)", false, false, false, true, 0, true, -999, hDxIB);
     aliceNormalize(hDxIB);
     aliceDrawTH2(hDxIB, true);
     adjustPaletteWidth(hDxIB);
@@ -75,7 +80,7 @@ void plotClusters(const char* fName = "CheckClusters.root")
     saveCurrentCanvas("clusterIBDeltaX.pdf");
   }
   { // OB
-    aliceCanvas("OuterBarrel Cluster dX", 0, 1.5, -25, 25, "|eta_{Cluster}|", "#Delta(x_{Hit} - x_{Cluster }) (#mum)", false, false, false, true, 0, true, -999, hDxOB);
+    aliceCanvas("OuterBarrel Cluster dX", 0, etaMax, -25, 25, "|eta_{Hit}|", "#Delta(x_{Hit} - x_{Cluster COG}) (#mum)", false, false, false, true, 0, true, -999, hDxOB);
     aliceNormalize(hDxOB);
     aliceDrawTH2(hDxOB, true);
     adjustPaletteWidth(hDxOB);
