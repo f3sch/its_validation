@@ -14,8 +14,9 @@ void plotPulls()
       auto mean = inFile->Get<TH1F>(Form("hPull%sMean", pNames[i]));
       auto sigma = inFile->Get<TH1F>(Form("hPull%sSigma", pNames[i]));
       aliceCanvas(Form("Pion Pull %s distribution", pNames[i]), mean->GetXaxis()->GetBinLowEdge(2), mean->GetXaxis()->GetXmax(), -3, 3, "#it{p}_{T}^{MC} (GeV/#it{c})", "", true, true, false);
-      aliceDrawHist(mean, P6::kBlue, kALICESquare);
-      aliceDrawHist(sigma, P6::kRed, kALICECircle);
+      auto colors = getPettroffColorSet(2);
+      aliceDrawHist(mean, colors[0], kAllMarkers[0]);
+      aliceDrawHist(sigma, colors[1], kAllMarkers[1]);
       auto leg = aliceLeg(0.23, 0.18, 0.33, 0.4, 0, true, true);
       leg->AddEntry(mean, "#mu", "p");
       leg->AddEntry(sigma, "#sigma", "p");
@@ -28,8 +29,9 @@ void plotPulls()
     auto fit = inFile->Get<TF1>("fchi2_fit");
     auto c = aliceCanvas("Mahalanobis distance", h->GetXaxis()->GetBinLowEdge(1), h->GetXaxis()->GetXmax(), 0, 0.3, "Mahalanobis distance", "n. entries", false, false, false);
     c->getFrame()->GetYaxis()->SetTitleOffset(1.35);
-    aliceDrawHist(h, P6::kBlue, 0);
-    aliceDrawTF1(fit, P6::kRed, kDashed);
+    auto colors = getPettroffColorSet(2);
+    aliceDrawHist(h, colors[0], 0);
+    aliceDrawTF1(fit, colors[1], kDashed);
     drawFitInfo(fit, 0.60, 0.65);
     auto leg = aliceLeg(0.49, 0.70, 0.88, 0.88, 0, true, true);
     leg->AddEntry(h, "Mahalanobis distance", "le");

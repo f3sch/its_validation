@@ -86,9 +86,10 @@ void plotEfficiency(const char* fName = "CheckTracksITS3.root")
   hEffSum->Divide(hEffSum, hDen, 1., 1., "B");
 
   aliceCanvas("Tracking Efficiency", ptLimitsEff[0], ptLimitsEff[nPtBinsEff - 1], .01, 1.1, "#it{p}_{T} (GeV/#it{c})", "Efficiency (Fake-rate)", true, true, true);
-  aliceDrawHist(hEffGood, kALICEBlue, kALICECircle);
-  aliceDrawHist(hEffFake, kALICERed, kALICESquare);
-  aliceDrawHist(hEffSum, kALICEAsh, kALICETriangle);
+  auto colors = getPettroffColorSet(3);
+  aliceDrawHist(hEffGood, colors[0], kAllMarkers[0]);
+  aliceDrawHist(hEffFake, colors[1], kAllMarkers[1]);
+  aliceDrawHist(hEffSum, colors[2], kAllMarkers[2]);
   drawThisThesis();
   auto leg = aliceLeg(0.5, 0.3, 0.8, 0.6, 0, true);
   leg->AddEntry(hEffSum, "Sum", "p");

@@ -36,15 +36,16 @@ void plotResolution()
     auto hITSTPC = dynamic_cast<TH1F*>(inFile->Get("Pions/ITSTPC/hResDCAxyVsPtAllLayers_Pions_ITSTPC"));
     aliceCanvas("Pion DCA_{xy} resolution", hITS->GetXaxis()->GetBinLowEdge(2), hITS->GetXaxis()->GetXmax(), 1, 1000, "#it{p}_{T}^{MC} (GeV/#it{c})", "#sigma(DCA_{xy}) (#mum)", true, true, true);
     auto colors = getPettroffColorSet(7);
-    int icol{0};
-    aliceDrawHist(hITS, colors[icol++], kALICECircle);
-    aliceDrawHist(hITSTPC, colors[icol++], kALICESquare);
-    aliceDrawHist(hTDRDCAxy, colors[icol++], kALICECross);
-    aliceDrawGraph(gFATDCAxyITS3, colors[icol++]);
-    aliceDrawGraph(gFATDCAxyITS3TPC, colors[icol++], kDashed);
-    aliceDrawGraph(gFATDCAxyITS2, colors[icol++]);
-    aliceDrawGraph(gFATDCAxyITS2TPC, colors[icol++], kDashed);
-    auto leg = aliceLeg(0.5, 0.60, 0.88, 0.88, 2, true, true);
+    aliceDrawHist(hITS, colors[0], kAllMarkers[0]);
+    aliceDrawHist(hITSTPC, colors[1], kAllMarkers[1]);
+    aliceDrawHist(hTDRDCAxy, colors[2], kAllMarkers[2]);
+    aliceDrawGraph(gFATDCAxyITS3, colors[3]);
+    aliceDrawGraph(gFATDCAxyITS3TPC, colors[4], kDashed);
+    aliceDrawGraph(gFATDCAxyITS2, colors[5]);
+    aliceDrawGraph(gFATDCAxyITS2TPC, colors[6], kDashed);
+    // drawThisThesis();
+    drawSimulationInfo("pp", "13.6", "0.5", "1 MHz", true);
+    auto leg = aliceLeg(0.6, 0.60, 0.92, 0.88, 2, true, true);
     leg->AddEntry(hITS, "ITS3", "p");
     leg->AddEntry(hITSTPC, "ITS3-TPC", "p");
     leg->AddEntry(hTDRDCAxy, "ITS3 TDR", "p");
@@ -53,7 +54,6 @@ void plotResolution()
     leg->AddEntry(gFATDCAxyITS3TPC, "ITS3-TPC FAT", "l");
     leg->AddEntry(gFATDCAxyITS2, "ITS2 FAT", "l");
     leg->AddEntry(gFATDCAxyITS2TPC, "ITS2-TPC FAT", "l");
-    drawThisThesis();
     saveCurrentCanvas("dcaXYRes.pdf");
   }
   { // DCAz
@@ -61,15 +61,16 @@ void plotResolution()
     auto hITSTPC = dynamic_cast<TH1F*>(inFile->Get("Pions/ITSTPC/hResDCAzVsPtAllLayers_Pions_ITSTPC"));
     aliceCanvas("Pion DCA_{z} resolution", hITS->GetXaxis()->GetBinLowEdge(2), hITS->GetXaxis()->GetXmax(), 1, 1000, "#it{p}_{T}^{MC} (GeV/#it{c})", "#sigma(DCA_{z}) (#mum)", true, true, true);
     auto colors = getPettroffColorSet(7);
-    int icol{0};
-    aliceDrawHist(hITS, colors[icol++], kALICECircle);
-    aliceDrawHist(hITSTPC, colors[icol++], kALICESquare);
-    aliceDrawHist(hTDRDCAz, colors[icol++], kALICECross);
-    aliceDrawGraph(gFATDCAzITS3, colors[icol++]);
-    aliceDrawGraph(gFATDCAzITS3TPC, colors[icol++], kDashed);
-    aliceDrawGraph(gFATDCAzITS2, colors[icol++]);
-    aliceDrawGraph(gFATDCAzITS2TPC, colors[icol++], kDashed);
-    auto leg = aliceLeg(0.5, 0.60, 0.88, 0.88, 2, true, true);
+    aliceDrawHist(hITS, colors[0], kAllMarkers[0]);
+    aliceDrawHist(hITSTPC, colors[1], kAllMarkers[1]);
+    aliceDrawHist(hTDRDCAz, colors[2], kAllMarkers[2]);
+    aliceDrawGraph(gFATDCAzITS3, colors[3]);
+    aliceDrawGraph(gFATDCAzITS3TPC, colors[4], kDashed);
+    aliceDrawGraph(gFATDCAzITS2, colors[5]);
+    aliceDrawGraph(gFATDCAzITS2TPC, colors[6], kDashed);
+    // drawThisThesis();
+    drawSimulationInfo("pp", "13.6", "0.5", "1 MHz", true);
+    auto leg = aliceLeg(0.6, 0.60, 0.92, 0.88, 2, true, true);
     leg->AddEntry(hITS, "ITS3", "p");
     leg->AddEntry(hITSTPC, "ITS3-TPC", "p");
     leg->AddEntry(hTDRDCAz, "ITS3 TDR", "p");
@@ -78,7 +79,6 @@ void plotResolution()
     leg->AddEntry(gFATDCAzITS3TPC, "ITS3-TPC FAT", "l");
     leg->AddEntry(gFATDCAzITS2, "ITS2 FAT", "l");
     leg->AddEntry(gFATDCAzITS2TPC, "ITS2-TPC FAT", "l");
-    drawThisThesis();
     saveCurrentCanvas("dcaZRes.pdf");
   }
   { // Pt
@@ -88,20 +88,20 @@ void plotResolution()
     hITSTPC->Scale(100); // to %
     aliceCanvas("Pion #it{p}_{T} resolution", hITS->GetXaxis()->GetBinLowEdge(2), hITS->GetXaxis()->GetXmax(), 0.1, 100, "#it{p}_{T}^{MC} (GeV/#it{c})", "Momentum resolution (%)", true, true, true);
     auto colors = getPettroffColorSet(7); // more to have consistent coloring of the first three
-    int icol{0};
-    aliceDrawHist(hITS, colors[icol++], kALICECircle);
-    aliceDrawHist(hITSTPC, colors[icol++], kALICESquare);
-    aliceDrawHist(hTDRPtRes, colors[icol++], kALICECross);
-    aliceDrawGraph(gFATPtITS3, colors[icol++]);
-    aliceDrawGraph(gFATPtITS3TPC, colors[icol++], kDashed);
-    auto leg = aliceLeg(0.25, 0.625, 0.585, 0.905, 2, true, true);
+    aliceDrawHist(hITS, colors[0], kAllMarkers[0]);
+    aliceDrawHist(hITSTPC, colors[1], kAllMarkers[1]);
+    aliceDrawHist(hTDRPtRes, colors[2], kAllMarkers[2]);
+    aliceDrawGraph(gFATPtITS3, colors[3]);
+    aliceDrawGraph(gFATPtITS3TPC, colors[4], kDashed);
+    // drawThisThesis();
+    drawSimulationInfo("pp", "13.6", "0.5", "1 MHz", true, 0.63);
+    auto leg = aliceLeg(0.25, 0.68, 0.585, 0.905, 2, true, true);
     leg->AddEntry(hITS, "ITS3", "p");
     leg->AddEntry(hITSTPC, "ITS3-TPC", "p");
     leg->AddEntry(hTDRPtRes, "ITS3 TDR", "p");
     leg->AddEntry((TObject*)0, "", ""); // blank entry
     leg->AddEntry(gFATPtITS3, "ITS3 FAT", "l");
     leg->AddEntry(gFATPtITS3TPC, "ITS3-TPC FAT", "l");
-    drawThisThesis();
     saveCurrentCanvas("ptRes.pdf");
   }
 }

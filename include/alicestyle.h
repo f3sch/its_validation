@@ -5,6 +5,8 @@
 #include <TStyle.h>
 #include <TROOT.h>
 #include <TColor.h>
+#include <TPave.h>
+#include <TPaveText.h>
 #include <TCanvas.h>
 #include <TFrame.h>
 #include <TF1.h>
@@ -39,12 +41,23 @@ Font_t extraTextFont = 53; // default is helvetica-italics
 Font_t additionalInfoFont = 42;
 
 // Markers
-static const int kALICECircle = kFullCircle;
-static const int kALICESquare = kFullSquare;
-static const int kALICETriangle = kFullTriangleUp;
-static const int kALICETriangleDown = kFullTriangleDown;
-static const int kALICECross = kFullCross;
-// Linestyles
+// use only these since they are allowed
+enum Markers : Int_t {
+  // first full markers since they are easy to distinguish
+  kFullCircle = 20,
+  kFullSquare = 21,
+  kFullCross = 34,
+  kFullCrossX = 47,
+  kFullFourX = 41,
+  // then open markers since they are easy to distinguish
+  kOpenCircle = 24,
+  kOpenSquare = 25,
+  kOpenCross = 28,
+  kOpenCrossX = 46,
+  kOpenFourX = 40,
+};
+inline constexpr auto kAllMarkers = std::to_array<int>({Markers::kFullCircle, Markers::kFullSquare, Markers::kFullCross, Markers::kFullCrossX, Markers::kFullFourX,
+                                                        Markers::kOpenCircle, Markers::kOpenSquare, Markers::kOpenCross, Markers::kOpenCrossX, Markers::kOpenFourX});
 
 /// Colors
 // This is the Petroff color scheme with 6 colors.
@@ -129,7 +142,7 @@ std::vector<Int_t> getPettroffColorSet(Int_t ncolors)
 }
 
 // FWD
-void aliceDrawHist(TH1* h, int color, int marker = -1, const char* opt = "hist e same", Bool_t clamp = kTRUE);
+void aliceDrawHist(TH1* h, int color, int marker = -1, int fillstyle = -1, const char* opt = "hist e same", Bool_t clamp = kTRUE);
 void aliceDrawGraph(TGraph* g, int color, int linestyle = -1, int marker = -1, const char* opt = "l");
 void aliceDrawTF1(TF1* f, int color, int linestyle = -1, const char* opt = "same");
 TLegend* aliceLeg(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Int_t columns = 0, Bool_t whiteBg = kFALSE, Bool_t withBorder = kTRUE, Double_t textSize = aliceTextSizeLeg, Style_t textFont = aliceTextFont, Color_t textColor = kBlack);
@@ -317,10 +330,12 @@ void aliceStyleHist(TH1* h, int color, int marker = -1)
   h->SetMarkerColor(color);
   if (marker >= 0) {
     h->SetMarkerStyle(marker);
+  } else {
+    h->SetMarkerSize(0);
   }
 }
 
-void aliceDrawHist(TH1* h, int color, int marker, const char* opt, Bool_t clamp)
+void aliceDrawHist(TH1* h, int color, int marker, int fillstyle, const char* opt, Bool_t clamp)
 {
   aliceStyleHist(h, color, marker);
   if (gPad && clamp) {              // clamp to frame dimensions
@@ -350,6 +365,10 @@ void aliceDrawHist(TH1* h, int color, int marker, const char* opt, Bool_t clamp)
       }
       h->GetYaxis()->SetRangeUser(ymin, ymax);
     }
+  }
+  if (fillstyle >= 0) {
+    h->SetFillStyle(fillstyle);
+    h->SetFillColor(color);
   }
   h->Draw(opt);
 }
@@ -421,6 +440,39 @@ void drawText(const char* text, Double_t posX, Double_t posY, Font_t font, Short
   latex.SetTextSize(size);
 
   latex.DrawLatex(posX, posY, text);
+}
+
+void drawSimulationInfo(const char* system, const char* energy, const char* field, const char* ir, bool border = kFALSE, Double_t x = 0.22, Double_t y = 0.91, Double_t dy = 0.05)
+{
+  if (!border) {
+    TString txt = "#bf{ALICE Simulation}";
+    drawText(txt.Data(), x, y);
+    y -= dy;
+    txt = Form("%s, #sqrt{s}=%s TeV,", system, energy);
+    drawText(txt.Data(), x, y);
+    y -= dy;
+    txt = Form("B=%s T, IR=%s", field, ir);
+    drawText(txt.Data(), x, y);
+  } else {
+    auto pav = new TPaveText(x, y - 0.1, x + 0.25, y, "NDC NB");
+    auto addTxt = [&pav](const char* t, Font_t f) {
+      auto txt = pav->AddText(t);
+      txt->SetTextFont(f);
+      txt->SetTextAlign(12); // left aligned
+    };
+    pav->SetTextColor(kBlack);
+    pav->SetFillColor(kWhite);
+    pav->SetLineColor(kBlack);
+    pav->SetBorderSize(1);
+    pav->SetLineWidth(1);
+    TString txt = "ALICE Simulation";
+    addTxt(txt.Data(), 62);
+    txt = Form("%s, #sqrt{s}=%s TeV,", system, energy);
+    addTxt(txt.Data(), 42);
+    txt = Form("B=%s T, IR=%s", field, ir);
+    addTxt(txt.Data(), 42);
+    pav->Draw();
+  }
 }
 
 void drawFitInfo(TF1* f, Double_t x = 0.55, Double_t y = 0.85, Double_t dy = 0.05)
@@ -692,8 +744,8 @@ void aliceDrawTH2(TH2* h, Bool_t withZAxis = false, Bool_t withExtra = true, Boo
       h2 = gDirectory->Get<TH1D>(Form("%s_2", h->GetName()));
       h1 = gDirectory->Get<TH1D>(Form("%s_1", h->GetName()));
     }
-    aliceDrawHist(h2, P6::kBlue, kALICESquare, "hist e same", false);
-    aliceDrawHist(h1, P6::kRed, kALICECircle, "hist e same", false);
+    aliceDrawHist(h2, P6::kBlue, Markers::kFullCircle, -1, "hist e same", false);
+    aliceDrawHist(h1, P6::kRed, Markers::kFullSquare, -1, "hist e same", false);
     TLegend* leg = nullptr;
     if (x2 == -999 || y1 == -999) {
       x2 = 1.0 - gPad->GetRightMargin(); // right edge of plot area
